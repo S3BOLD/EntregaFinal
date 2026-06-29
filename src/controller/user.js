@@ -1,93 +1,115 @@
-const Model = require('../model/user');
-const jwt = require ('jsonwebtoken');
-const authConfig = require('../config/auth');
+const bcrypt = require("bcrypt");
 
-class User {
-    constructor() {
-    }
+const User = require("../model/user");
 
-    replacePassword(password) {
-        return '*'.repeat(password.length);
-    }
+class UserController {
 
-    mapUser(user) {
-        const userData = user.dataValues || user;
+    async create(name, email, password) {
 
-        return {
-            ...userData,
-            password: this.replacePassword(userData.password)
-        };
-    }
+        if (!name || !email || !password) {
 
-    mapPublicUser(user) {
-        const mapped = this.mapUser(user);
+            throw new Error("Todos os campos são obrigatórios.");
 
-        return {
-            id: mapped.id,
-            email: mapped.email,
-            name: mapped.name
         }
+
+        const exists = await User.findOne({
+
+            where: { email }
+
+        });
+
+        if (exists) {
+
+            throw new Error("Email já está em uso.");
+
+        }
+
+        const hash = await bcrypt.hash(password, 10);
+
+        return User.create({
+
+            name,
+
+            email,
+
+            password: hash
+
+        });
+
     }
 
     async getAll() {
-        return (await Model.getAllUsers())
-            .map(u => this.mapUser(u));
-    }
 
-    async create(email, password, name) {
-        if (password.length < 6) {
-            throw new Error('A senha deve conter pelo menos 6 caracteres');
-        }
-        if (email.length < 5 || !email.includes('@')) {
-            throw new Error('O email deve conter no minimo 5 caracteres e ter o "@"');
-        }
-        
-        const user = await Model.createUser(email, password, name);
-        return {...user, password: this.replacePassword(user.password)};
-    }
+        return User.findAll({
 
+            attributes: {
 
-    async login (email, password) {
-        const user = await Model.getUserByEmail(email);
+                exclude: ["password"]
 
-        if (!user || user.password !== password){
-            throw new Error('Credenciais inválidas');
-        }
+            }
 
-        const token = jwt.sign(
-            { id: user.id, email: user.email,},
-            authConfig.jwt.secret,
-            { expiresIn: authConfig.jwt.expiresIn}
-        );
+        });
 
-        return {
-            token,
-            user: this.mapPublicUser(user)
-        };
     }
 
     async getById(id) {
-        const user = await Model.getUserById(id);
 
-        return this.mapUser(user);
+        return User.findByPk(id, {
+
+            attributes: {
+
+                exclude: ["password"]
+
+            }
+
+        });
+
     }
 
-    async update(id, email, password, name) {
-        if (password.length < 6) {
-            throw new Error('A senha deve conter pelo menos 6 caracteres');
-        }
-        if (email.length < 5 || !email.includes('@')) {
-            throw new Error('O email deve conter no minimo 5 caracteres e ter o "@"');
+    async update(id, data) {
+
+        const user = await User.findByPk(id);
+
+        if (!user) {
+
+            throw new Error("Usuário não encontrado.");
+
         }
 
-        const user = await Model.updateUser(id, email, password, name);
-        return {...user, password: this.replacePassword(user.password) };
+        if (data.password) {
+
+            data.password = await bcrypt.hash(
+
+                data.password,
+
+                10
+
+            );
+
+        }
+
+        await user.update(data);
+
+        return this.getById(id);
 
     }
 
     async delete(id) {
-        return await Model.deleteUser(id);
+
+        const user = await User.findByPk(id);
+
+        if (!user) {
+
+            throw new Error("Usuário não encontrado.");
+
+        }
+
+        await user.destroy();
+
+        return true;
+
     }
+
 }
 
-module.exports = new User();
+module.exports = new UserController();

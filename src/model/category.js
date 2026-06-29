@@ -1,45 +1,57 @@
-const {sequelize} = require('./db');
-const {DataTypes} = require('sequelize');
+const { DataTypes } = require("sequelize");
+const sequelize = require("./db");
 
-const category = sequelize.define('categorys', {
+const Category = sequelize.define("Category", {
+
     id: {
+
         type: DataTypes.INTEGER,
-        autoIncrement: true,
-        primaryKey: true
+
+        primaryKey: true,
+
+        autoIncrement: true
+
     },
-    expenseId:{
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        reference: {
-            model: 'users',
-            key:'id'
-        },
-        onDelete: 'CASCADE',
-        onUpdate: 'CASCADE'
-    },
-    description:{
+
+    name: {
+
         type: DataTypes.STRING,
+
         allowNull: false
+
+    },
+
+    description: {
+
+        type: DataTypes.STRING
+
     }
-})
+
+}, {
+
+    tableName: "Categories"
+
+});
+
+
 
 class categoryModel {
     constructor() {}
 
     async getAllCategorys() {
-        return await category.findAll();
+        return await Category.findAll();
     }
 
     async getCategoryById(id) {
-        return await category.findByPk(id);
+        return await Category.findByPk(id);
     }
 
     async getCategoryByExpenseId(expenseId) {
-        return await category.findAll({where: { expenseId } });
+        return await Category.findAll({where: { expenseId } });
     }
 
     async createCategory(expenseId, description) {
-        return await category.create({ expenseId, description });
+        return await Category.create({ expenseId, description });
     }
 
     async updateCategory(id, description) {
@@ -69,6 +81,6 @@ class categoryModel {
 }
 
 const CategoryModel = new categoryModel();
-CategoryModel.category = category;
+CategoryModel.category = Category;
 
 module.exports = CategoryModel;

@@ -1,32 +1,43 @@
-const { toDefaultValue } = require('sequelize/lib/utils');
-const { sequelize } = require('./db');
-const { DataTypes } = require('sequelize');
+const { DataTypes } = require("sequelize");
+const sequelize = require("./db");
 
-const User = sequelize.define('users', {
+const User = sequelize.define("User", {
+
     id: {
-        type:DataTypes.INTEGER,
-        autoIncrement: true,
-        primaryKey: true
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
     },
-    email: {
-        type: DataTypes.STRING,
-        allownull: false,
-        unique: true
-    },
+
     name: {
         type: DataTypes.STRING,
-        allownull: false
+        allowNull: false,
+        validate: {
+            notEmpty: true
+        }
     },
+
+    email: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
+        validate: {
+            isEmail: true
+        }
+    },
+
     password: {
         type: DataTypes.STRING,
-        allownull: false
-    },
-    createAt: {
-        type: DataTypes.DATE,
-        allownull: false,
-        toDefaultValue: DataTypes.NOW
+        allowNull: false
     }
-})
+
+}, {
+
+    tableName: "Users"
+
+});
+
+
 
 class UserModel {
     

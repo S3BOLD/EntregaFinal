@@ -1,40 +1,44 @@
-const jwt = require('jsonwebtoken');
-const authConfig = require('../config/auth');
+const jwt = require("jsonwebtoken");
+require("dotenv").config();
 
-module.exports = function authMiddleware(req, res, next) {
+module.exports = (req, res, next) => {
+
     const authHeader = req.headers.authorization;
 
     if (!authHeader) {
-        return res.status(401).json({error: 'Token não informado' });
+        return res.status(401).json({
+            error: "Token not provided."
+        });
     }
 
-    const [scheme, token] = authHeader.split(' ');
+    const parts = authHeader.split(" ");
 
-    if (scheme !== 'Bearer' || !token) {
-        return req.status(401).json({error: 'Token mal formatado' });
+    if (parts.length !== 2) {
+        return res.status(401).json({
+            error: "Token error."
+        });
     }
 
-    try {
-        const decoded = jwt.verify(token, authConfig.jwt.secret);
-        req.user = {
-            id: decoded.id,
-            email: decoded.email,
-            role: decoded.role
-        };
-    
-        // Se o token for válido, o usuário é autenticado e pode acessar as rotas protegidas
+    const [scheme, token] = parts;
 
-        // Identificar a rota e o método HTTP para aplicar regras de autorização
-        const method = req.method;
-        const path = req.path;
+    if (!/^Bearer$/i.test(scheme)) {
+        return res.status(401).json({
+            error: "Token malformed."
+        });
+    }
 
-        console.log(` Middleware de autenticação: ${method} ${path} - Usuário: ${req.user.email} (Role: ${req.user.role})`);
-        if (path.startsWith('/users') && req.user.role !== 'admin') {
-            return res.status(403).json({ error: 'Acesso negado: apenas administradores podem acessar esta rota' });
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+
+        if (err) {
+            return res.status(401).json({
+                error: "Invalid token."
+            });
         }
 
+        req.userId = decoded.id;
+
         return next();
-    } catch (error) {
-        return res.status(401).json({ error: 'Token inválido ou expirado' });
-    }
+
+    });
+
 };
