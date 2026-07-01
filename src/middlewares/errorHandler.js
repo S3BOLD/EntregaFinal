@@ -1,13 +1,6 @@
-module.exports = (err, req, res, next) => {
-
-    console.error(err);
-
-    return res.status(err.status || 500).json({
-
-        success: false,
-
-        message: err.message || "Internal server error."
-
-    });
-
+// Middleware global de tratamento de erros.
+// Registrado por último em index.js, depois de todas as rotas.
+module.exports = function (erro, req, res, next) {
+    console.error(erro);
+    res.status(500).json({ erro: 'Erro interno no servidor' });
 };

@@ -1,45 +1,13 @@
-const User = require("./user");
-const Expense = require("./expenses");
-const Category = require("./category");
+const { User } = require('./user');
+const { Category } = require('./category');
+const { Expense } = require('./expenses');
 
-User.hasMany(Expense, {
+// Um usuário tem várias despesas / uma despesa pertence a um usuário
+User.hasMany(Expense, { foreignKey: 'userId' });
+Expense.belongsTo(User, { foreignKey: 'userId' });
 
-    foreignKey: "userId",
+// Uma categoria tem várias despesas / uma despesa pertence a uma categoria
+Category.hasMany(Expense, { foreignKey: 'categoryId' });
+Expense.belongsTo(Category, { foreignKey: 'categoryId', as: 'category' });
 
-    as: "expenses"
-
-});
-
-Expenses.belongsTo(User, {
-
-    foreignKey: "userId",
-
-    as: "user"
-
-});
-
-Category.hasMany(Expense, {
-
-    foreignKey: "categoryId",
-
-    as: "expenses"
-
-});
-
-Expense.belongsTo(Category, {
-
-    foreignKey: "categoryId",
-
-    as: "category"
-
-});
-
-module.exports = {
-
-    User,
-
-    Expense,
-
-    Category
-
-};
+module.exports = { User, Category, Expense };

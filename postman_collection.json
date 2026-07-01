@@ -1,0 +1,122 @@
+{
+  "info": {
+    "name": "API Controle de Despesas",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "token", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Cadastrar usuário",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/users",
+        "body": { "mode": "raw", "raw": "{\n  \"name\": \"Usuário Teste\",\n  \"email\": \"teste@example.com\",\n  \"password\": \"123456\"\n}" }
+      }
+    },
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/auth/login",
+        "body": { "mode": "raw", "raw": "{\n  \"email\": \"demo@example.com\",\n  \"password\": \"123456\"\n}" }
+      }
+    },
+    {
+      "name": "Listar usuários",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{baseUrl}}/users"
+      }
+    },
+    {
+      "name": "Listar categorias",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{baseUrl}}/categories"
+      }
+    },
+    {
+      "name": "Criar categoria",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "url": "{{baseUrl}}/categories",
+        "body": { "mode": "raw", "raw": "{\n  \"name\": \"Educação\",\n  \"description\": \"Cursos e livros\"\n}" }
+      }
+    },
+    {
+      "name": "Listar despesas (com filtros)",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{baseUrl}}/expenses?status=PAGA&category=1"
+      }
+    },
+    {
+      "name": "Criar despesa",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "url": "{{baseUrl}}/expenses",
+        "body": { "mode": "raw", "raw": "{\n  \"description\": \"Supermercado\",\n  \"amount\": 250.90,\n  \"date\": \"2026-06-15\",\n  \"status\": \"PENDENTE\",\n  \"categoryId\": 1\n}" }
+      }
+    },
+    {
+      "name": "Atualizar despesa",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "url": "{{baseUrl}}/expenses/1",
+        "body": { "mode": "raw", "raw": "{\n  \"status\": \"PAGA\"\n}" }
+      }
+    },
+    {
+      "name": "Remover despesa",
+      "request": {
+        "method": "DELETE",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{baseUrl}}/expenses/1"
+      }
+    },
+    {
+      "name": "Total de gastos",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{baseUrl}}/dashboard/total-expenses"
+      }
+    },
+    {
+      "name": "Quantidade de despesas",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{baseUrl}}/dashboard/expenses-count"
+      }
+    },
+    {
+      "name": "Gastos por categoria",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{baseUrl}}/dashboard/expenses-by-category"
+      }
+    }
+  ]
+}

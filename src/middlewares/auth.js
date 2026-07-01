@@ -1,44 +1,25 @@
-const jwt = require("jsonwebtoken");
-require("dotenv").config();
+const jwt = require('jsonwebtoken');
+const auth = require('../config/auth');
 
-module.exports = (req, res, next) => {
-
+// Verifica se o token JWT foi enviado e é válido
+module.exports = function (req, res, next) {
     const authHeader = req.headers.authorization;
 
     if (!authHeader) {
-        return res.status(401).json({
-            error: "Token not provided."
-        });
+        return res.status(401).json({ erro: 'Token não informado' });
     }
 
-    const parts = authHeader.split(" ");
+    const token = authHeader.split(' ')[1];
 
-    if (parts.length !== 2) {
-        return res.status(401).json({
-            error: "Token error."
-        });
+    if (!token) {
+        return res.status(401).json({ erro: 'Token mal formatado' });
     }
 
-    const [scheme, token] = parts;
-
-    if (!/^Bearer$/i.test(scheme)) {
-        return res.status(401).json({
-            error: "Token malformed."
-        });
-    }
-
-    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-
-        if (err) {
-            return res.status(401).json({
-                error: "Invalid token."
-            });
-        }
-
+    try {
+        const decoded = jwt.verify(token, auth.secret);
         req.userId = decoded.id;
-
-        return next();
-
-    });
-
+        next();
+    } catch (erro) {
+        res.status(401).json({ erro: 'Token inválido ou expirado' });
+    }
 };

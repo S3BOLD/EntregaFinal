@@ -1,186 +1,86 @@
-const { DataTypes } = require("sequelize");
-const sequelize = require("./db");
+const sequelize = require('../config/database');
+const { DataTypes } = require('sequelize');
+const { Category } = require('./category');
 
-const Expense = sequelize.define("Expense", {
-
+// Tabela de despesas
+const Expense = sequelize.define('Expense', {
     id: {
-
         type: DataTypes.INTEGER,
-
-        primaryKey: true,
-
-        autoIncrement: true
-
+        autoIncrement: true,
+        primaryKey: true
     },
-
-    title: {
-
-        type: DataTypes.STRING,
-
-        allowNull: false
-
-    },
-
     description: {
-
-        type: DataTypes.TEXT,
-
+        type: DataTypes.STRING,
         allowNull: false
-
     },
-
     amount: {
-
-        type: DataTypes.FLOAT,
-
-        allowNull: false,
-
-        validate: {
-
-            min: 0
-
-        }
-
+        type: DataTypes.DOUBLE,
+        allowNull: false
     },
-
     date: {
-
         type: DataTypes.DATEONLY,
-
         allowNull: false
-
     },
-
     status: {
-
-        type: DataTypes.ENUM("PENDING", "PAID"),
-
-        defaultValue: "PENDING"
-
+        type: DataTypes.STRING, // 'PENDENTE' ou 'PAGA'
+        allowNull: false,
+        defaultValue: 'PENDENTE'
     },
-
-    userId: {
-
-        type: DataTypes.INTEGER,
-
-        allowNull: false
-
-    },
-
     categoryId: {
-
         type: DataTypes.INTEGER,
-
         allowNull: false
-
+    },
+    userId: {
+        type: DataTypes.INTEGER,
+        allowNull: false
     }
-
 }, {
-
-    tableName: "Expenses"
-
+    tableName: 'expenses',
+    timestamps: false
 });
 
+class ExpensesModel {
 
-class Expenses {
+    async create(data) {
+        return await Expense.create(data);
+    }
 
-    async create(title, date, amount, description, categoryId, userId) {
-
-        return Expense.create({
-
-            title,
-            date,
-            amount,
-            description,
-            categoryId,
-            userId
-
+    async getAll(where) {
+        return await Expense.findAll({
+            where,
+            include: { model: Category, as: 'category' }
         });
-
     }
 
-    async getAll(filters = {}) {
-
-        const where = {};
-
-        if (filters.status) {
-
-            where.status = filters.status;
-
-        }
-
-        if (filters.categoryId) {
-
-            where.categoryId = filters.categoryId;
-
-        }
-
-        if (filters.minValue || filters.maxValue) {
-
-            where.amount = {};
-
-            if (filters.minValue) {
-
-                where.amount[Op.gte] = filters.minValue;
-
-            }
-
-            if (filters.maxValue) {
-
-                where.amount[Op.lte] = filters.maxValue;
-
-            }
-
-        }
-
-        if (filters.startDate || filters.endDate) {
-
-            where.date = {};
-
-            if (filters.startDate) {
-
-                where.date[Op.gte] = filters.startDate;
-
-            }
-
-            if (filters.endDate) {
-
-                where.date[Op.lte] = filters.endDate;
-
-            }
-
-        }
-
-        return Expense.findAll({ where });
-
-    }
-
-    async getById(id) {
-
-        return Expense.findByPk(id);
-
-    }
-
-    async update(id, data) {
-
-        return Expense.update(data, {
-
-            where: { id }
-
+    async getById(id, userId) {
+        return await Expense.findOne({
+            where: { id, userId },
+            include: { model: Category, as: 'category' }
         });
-
     }
 
-    async delete(id) {
+    async update(id, userId, data) {
+        const expense = await Expense.findOne({ where: { id, userId } });
+        if (!expense) {
+            return null;
+        }
 
-        return Expense.destroy({
-
-            where: { id }
-
-        });
-
+        await expense.update(data);
+        return expense;
     }
 
+    async delete(id, userId) {
+        const expense = await Expense.findOne({ where: { id, userId } });
+        if (!expense) {
+            return false;
+        }
+
+        await expense.destroy();
+        return true;
+    }
 }
 
-module.exports = new Expenses();
+const expensesModel = new ExpensesModel();
+expensesModel.Expense = Expense;
+
+module.exports = expensesModel;

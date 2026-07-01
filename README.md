@@ -1,230 +1,153 @@
-# Expense Control API
+# API de Controle de Despesas
 
-API REST desenvolvida em Node.js utilizando Express, Sequelize e MySQL para gerenciamento de despesas pessoais.
+## Como rodar
 
----
-
-## Tecnologias
-
-- Node.js
-- Express
-- Sequelize
-- MySQL
-- JWT
-- bcrypt
-- dotenv
-- Swagger
-
----
-
-## Instalação
-
-Clone o projeto
-
-```bash
-git clone https://github.com/SEU_USUARIO/expense-control-api.git
-```
-
-Entre na pasta
-
-```bash
-cd expense-control-api
-```
-
-Instale as dependências
-
+1. Instalar as dependências:
 ```bash
 npm install
 ```
 
----
-
-## Arquivo .env
-
-Crie um arquivo chamado
-
-```
-.env
-```
-
-com o conteúdo
-
-```env
-PORT=3000
-
-DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=
-DB_NAME=expenses
-
-JWT_SECRET=123456789
-```
-
----
-
-## Criar banco
-
-No MySQL
-
-```sql
-CREATE DATABASE expenses;
-```
-
----
-
-## Executar migrations
-
+2. Criar o arquivo `.env` a partir do exemplo e ajustar com os dados do seu MySQL:
 ```bash
-npx sequelize-cli db:migrate
+cp .env.example .env
 ```
 
----
-
-## Executar seeders
-
+3. Criar o banco e rodar as migrations/seeders:
 ```bash
-npx sequelize-cli db:seed:all
+npm run db:create
+npm run db:migrate
+npm run db:seed
 ```
+(também é possível rodar `src/database/schema.sql` direto no MySQL, se preferir)
 
----
-
-## Rodar projeto
-
+4. Iniciar o servidor:
 ```bash
 npm start
 ```
 
-Servidor
+A API sobe em `http://localhost:3000`.
+
+## Usuário de teste (vem do seeder)
 
 ```
-http://localhost:3000
+email: demo@example.com
+password: 123456
 ```
-
-Swagger
-
-```
-http://localhost:3000/api-docs
-```
-
----
-
-# Login
-
-```
-POST /auth/login
-```
-
-Body
-
-```json
-{
-    "email":"admin@email.com",
-    "password":"123456"
-}
-```
-
----
-
-# Usuários
-
-| Método | Endpoint |
-|---------|----------|
-| POST | /users |
-| GET | /users |
-| GET | /users/:id |
-| PUT | /users/:id |
-| DELETE | /users/:id |
-
----
-
-# Categorias
-
-| Método | Endpoint |
-|---------|----------|
-| GET | /categories |
-| GET | /categories/:id |
-| POST | /categories |
-| PUT | /categories/:id |
-| DELETE | /categories/:id |
-
----
-
-# Despesas
-
-| Método | Endpoint |
-|---------|----------|
-| GET | /expenses |
-| GET | /expenses/:id |
-| POST | /expenses |
-| PUT | /expenses/:id |
-| DELETE | /expenses/:id |
-
----
-
-## Filtros
-
-```
-GET /expenses?status=PAID
-```
-
-```
-GET /expenses?categoryId=1
-```
-
-```
-GET /expenses?startDate=2026-01-01&endDate=2026-12-31
-```
-
-```
-GET /expenses?minValue=100&maxValue=1000
-```
-
----
-
-# Dashboard
-
-```
-GET /dashboard/total-expenses
-```
-
-```
-GET /dashboard/expenses-count
-```
-
-```
-GET /dashboard/expenses-by-category
-```
-
----
 
 ## Autenticação
 
-Todas as rotas (exceto cadastro e login) utilizam Bearer Token.
+Depois do login, envie o token recebido no header das rotas protegidas:
+```
+Authorization: Bearer <token>
+```
+Só `POST /users` e `POST /auth/login` são públicas, todo o resto exige login.
+
+## Rotas
+
+### Usuários
+| Método | Rota        | Descrição            |
+|--------|-------------|------------------------|
+| POST   | /users      | Cadastro de usuário    |
+| GET    | /users      | Lista usuários         |
+| GET    | /users/:id  | Busca usuário por id   |
+| PUT    | /users/:id  | Atualiza usuário       |
+| DELETE | /users/:id  | Remove usuário         |
+
+Corpo de cadastro/login:
+```json
+{
+  "name": "Maria Teste",
+  "email": "maria@example.com",
+  "password": "123456"
+}
+```
+
+### Login
+| Método | Rota         | Descrição           |
+|--------|--------------|----------------------|
+| POST   | /auth/login  | Login (retorna JWT)  |
+
+### Categorias
+| Método | Rota             | Descrição           |
+|--------|------------------|----------------------|
+| GET    | /categories      | Lista categorias     |
+| GET    | /categories/:id  | Busca por id         |
+| POST   | /categories      | Cria categoria       |
+| PUT    | /categories/:id  | Atualiza categoria   |
+| DELETE | /categories/:id  | Remove categoria     |
+
+Corpo (POST/PUT `/categories`):
+```json
+{
+  "name": "Educação",
+  "description": "Cursos e livros"
+}
+```
+
+### Despesas
+| Método | Rota            | Descrição          |
+|--------|-----------------|----------------------|
+| GET    | /expenses       | Lista despesas (aceita filtros) |
+| GET    | /expenses/:id   | Busca por id        |
+| POST   | /expenses       | Cria despesa        |
+| PUT    | /expenses/:id   | Atualiza despesa    |
+| DELETE | /expenses/:id   | Remove despesa      |
+
+Corpo (POST/PUT `/expenses`):
+```json
+{
+  "description": "Supermercado",
+  "amount": 250.90,
+  "date": "2026-06-15",
+  "status": "PENDENTE",
+  "categoryId": 1
+}
+```
+
+### Filtros de despesas
+
+`GET /expenses` aceita os seguintes parâmetros de query (todos opcionais e combináveis):
+
+- `category` -> id da categoria
+- `status` -> `PENDENTE` ou `PAGA`
+- `startDate` e `endDate` -> período (formato `YYYY-MM-DD`)
+- `minAmount` e `maxAmount` -> faixa de valor
 
 Exemplo:
-
 ```
-Authorization: Bearer SEU_TOKEN
-```
-
----
-
-## Estrutura
-
-```
-src/
-│
-├── config/
-├── controller/
-├── middlewares/
-├── model/
-├── routes/
-├── view/
-│
-├── app.js
-└── server.js
+GET /expenses?status=PAGA&category=1
 ```
 
----
+### Dashboard
 
-## Desenvolvido para a disciplina de Backend.
+Esses endpoints também aceitam os mesmos filtros acima.
+
+```
+GET /dashboard/total-expenses        -> { "total": 3500.50 }
+GET /dashboard/expenses-count        -> { "quantidade": 45 }
+GET /dashboard/expenses-by-category  -> [ { "categoria": "Alimentação", "total": 1200 } ]
+```
+> As chaves `total`, `quantidade` e `categoria` nas respostas do dashboard seguem exatamente o formato pedido no enunciado da disciplina, por isso continuam em português.
+
+## Entidades
+
+- **Usuário (User)**: id, name, email, password (criptografada com bcrypt), createdAt, updatedAt
+- **Categoria (Category)**: id, name, description
+- **Despesa (Expense)**: id, description, amount, date, status (`PENDENTE`/`PAGA`), categoryId, userId
+
+## Relacionamentos
+
+- Um usuário tem várias despesas
+- Uma categoria tem várias despesas
+- Uma despesa pertence a um usuário e a uma categoria
+
+## Segurança
+
+- Senha criptografada com `bcrypt` antes de salvar no banco
+- Login com JWT (`middlewares/auth.js` valida o token nas rotas protegidas)
+- Tratamento global de erros (`middlewares/errorHandler.js`), com mensagens em português
+- Dados sensíveis (senha do banco, segredo do JWT) ficam no `.env`
+
+## Collection do Postman
+
+Está em `postman_collection.json`, na raiz do projeto. Basta importar no Postman, rodar o "Login" e colar o token recebido na variável `token` da coleção.

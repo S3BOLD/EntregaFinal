@@ -1,86 +1,61 @@
-const { DataTypes } = require("sequelize");
-const sequelize = require("./db");
+const sequelize = require('../config/database');
+const { DataTypes } = require('sequelize');
 
-const Category = sequelize.define("Category", {
-
+// Tabela de categorias
+const Category = sequelize.define('Category', {
     id: {
-
         type: DataTypes.INTEGER,
-
-        primaryKey: true,
-
-        autoIncrement: true
-
+        autoIncrement: true,
+        primaryKey: true
     },
-
     name: {
-
         type: DataTypes.STRING,
-
         allowNull: false
-
     },
-
     description: {
-
         type: DataTypes.STRING
-
     }
-
 }, {
-
-    tableName: "Categories"
-
+    tableName: 'categories',
+    timestamps: false
 });
 
+class CategoryModel {
 
+    async create(name, description) {
+        return await Category.create({ name, description });
+    }
 
-class categoryModel {
-    constructor() {}
-
-    async getAllCategorys() {
+    async getAll() {
         return await Category.findAll();
     }
 
-    async getCategoryById(id) {
+    async getById(id) {
         return await Category.findByPk(id);
     }
 
-    async getCategoryByExpenseId(expenseId) {
-        return await Category.findAll({where: { expenseId } });
-    }
-
-    async createCategory(expenseId, description) {
-        return await Category.create({ expenseId, description });
-    }
-
-    async updateCategory(id, description) {
-        const Category = await this.getCategoryById(id);
-
-        if (!Category) {
+    async update(id, data) {
+        const category = await this.getById(id);
+        if (!category) {
             return null;
         }
 
-        Category.description = description;
-
-        await Category.save();
-        return Category;
+        await category.update(data);
+        return category;
     }
 
-    async deleteCategory(id) {
-        const Category = await this.getCategoryById(id);
-
-        if (!Category) {
+    async delete(id) {
+        const category = await this.getById(id);
+        if (!category) {
             return false;
         }
 
-        await Category.destroy();
+        await category.destroy();
         return true;
     }
-
 }
 
-const CategoryModel = new categoryModel();
-CategoryModel.category = Category;
+const categoryModel = new CategoryModel();
+categoryModel.Category = Category;
 
-module.exports = CategoryModel;
+module.exports = categoryModel;

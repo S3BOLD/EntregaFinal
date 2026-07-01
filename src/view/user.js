@@ -1,94 +1,70 @@
-const UserController = require('../controller/user');
+const Controller = require('../controller/user');
 
-class User {
-    constructor() {
-    }
+module.exports = {
+
+    async create(req, res) {
+        try {
+            const { name, email, password } = req.body || {};
+            const user = await Controller.create(name, email, password);
+            res.status(201).json(user);
+        } catch (erro) {
+            res.status(400).json({ erro: erro.message });
+        }
+    },
 
     async login(req, res) {
         try {
             const { email, password } = req.body || {};
-
-            if (!email || !password) {
-                return res.status(400).json({ error: 'Email e senha são obrigatórios' });
-            }
-
-            const auth = await UserController.login(email, password);
-            return res.json(auth);
-        } catch (error) {
-            console.error('Erro em logar Usuário: ', error);
-            return res.status(401).json({ error: error.message });
+            const resultado = await Controller.login(email, password);
+            res.json(resultado);
+        } catch (erro) {
+            res.status(401).json({ erro: erro.message });
         }
-    }
+    },
 
     async getAll(req, res) {
         try {
-            const user = await UserController.getAll();
+            const users = await Controller.getAll();
             res.json(users);
-        } catch (error) {
-            console.error('Erro em chamar Usuário: ', error);
-            res.status(500).json({ error: error.message });
+        } catch (erro) {
+            res.status(500).json({ erro: erro.message });
         }
-    }
-
-    async create(req, res) {
-        try {
-            const { email, password, name } = req.body;
-
-            if (!email || !password || !name) {
-                return res, status(400).json({ error: 'Email, senha e nome são obrigatóios' });
-            }
-
-            const newUser = await UserController.create(email, password, name);
-            res.status(201).json(newUser);
-        } catch (error) {
-            console.error('Erro em criar Usuário: ', error);
-            res.status(400).json({ error: error.message });
-        }
-    }
+    },
 
     async getById(req, res) {
         try {
-            const id = Number(req.params.id);
-            const user = await UserController.getById(id);
-
+            const user = await Controller.getById(req.params.id);
+            if (!user) {
+                return res.status(404).json({ erro: 'Usuário não encontrado' });
+            }
             res.json(user);
-        } catch (error) {
-            console.error('Erro em chamar Usuário: ', error);
-            res.status(500).json({ error: error.message });
+        } catch (erro) {
+            res.status(500).json({ erro: erro.message });
         }
-    }
+    },
 
     async update(req, res) {
         try {
-            const id = Number(req.params.id);
-            const { email, password, name } = req.body;
-
-            const updateUser = await UserController.update(id, email, password, name);
-            if (!updateUser) {
-                return res.status(404).json({ error: 'Usuário não encontrado' });
+            const { name, email, password } = req.body || {};
+            const user = await Controller.update(req.params.id, name, email, password);
+            if (!user) {
+                return res.status(404).json({ erro: 'Usuário não encontrado' });
             }
-
-            res.json(updateUser);
-        } catch (error) {
-            console.error('Erro em atualizar Usuário', error);
-            res.status(400).json({ error: error.message });
+            res.json(user);
+        } catch (erro) {
+            res.status(400).json({ erro: erro.message });
         }
-    }
+    },
 
     async delete(req, res) {
         try {
-            const id = Number(req.params.id);
-            const result = await UserController.delete(id);
-            if (result === null) {
-                return res.status(404).json({ error: 'Usuário não encontrado' });
+            const removido = await Controller.delete(req.params.id);
+            if (!removido) {
+                return res.status(404).json({ erro: 'Usuário não encontrado' });
             }
-
             res.status(204).send();
-        } catch (error) {
-            console.error('Erro em deletar Usuário: ', error);
-            res.status(500).json({ error: error.message });
+        } catch (erro) {
+            res.status(500).json({ erro: erro.message });
         }
     }
-}
-
-module.exports = new User();
+};

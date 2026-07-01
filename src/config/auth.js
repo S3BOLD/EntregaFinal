@@ -1,8 +1,7 @@
 require('dotenv').config();
 
+// Configuração do JWT usada para gerar e validar o token de login
 module.exports = {
-    jwt:{
-        secret: process.env.JWT_SECRET || 'dev-secret-change-me',
-        expiresIn: process.env.JWT_EXPIRES_IN || '1d'
-    }
+    secret: process.env.JWT_SECRET || 'segredo123',
+    expiresIn: '1d'
 };

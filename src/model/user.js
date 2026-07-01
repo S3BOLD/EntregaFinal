@@ -1,90 +1,67 @@
-const { DataTypes } = require("sequelize");
-const sequelize = require("./db");
+const sequelize = require('../config/database');
+const { DataTypes } = require('sequelize');
 
-const User = sequelize.define("User", {
-
+// Tabela de usuários
+const User = sequelize.define('User', {
     id: {
         type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
+        autoIncrement: true,
+        primaryKey: true
     },
-
     name: {
         type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-            notEmpty: true
-        }
+        allowNull: false
     },
-
     email: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true,
-        validate: {
-            isEmail: true
-        }
+        unique: true
     },
-
     password: {
         type: DataTypes.STRING,
         allowNull: false
     }
-
 }, {
-
-    tableName: "Users"
-
+    tableName: 'users'
 });
 
-
-
 class UserModel {
-    
-    constructor() {}
 
-    async getAllUsers() {
-        return await User.findAll(); 
+    async create(name, email, password) {
+        return await User.create({ name, email, password });
     }
 
-    async createUser(email, password, name) {
-        return await User.create({ email, password, name}); 
+    async getAll() {
+        return await User.findAll();
     }
 
-    async getUserByEmail(email) {
+    async getById(id) {
+        return await User.findByPk(id);
+    }
+
+    async getByEmail(email) {
         return await User.findOne({ where: { email } });
     }
 
-    async getUserById(id) {
-        return await User.findByPk(id); // SELECT * FROM users WHERE id = ? com endereços
-    }
-
-    async updateUser(id, email, password, name) {
-        const user = await this.getUserById(id);
-
+    async update(id, data) {
+        const user = await this.getById(id);
         if (!user) {
             return null;
         }
 
-        user.email = email;
-        user.password = password;
-        user.name = name;
-
-        await user.save();
+        await user.update(data);
         return user;
     }
 
-    async deleteUser(id) {
-        const user = await this.getUserById(id);
-
+    async delete(id) {
+        const user = await this.getById(id);
         if (!user) {
-            return null;
+            return false;
         }
 
         await user.destroy();
-        return null;
+        return true;
     }
-
 }
 
 const userModel = new UserModel();

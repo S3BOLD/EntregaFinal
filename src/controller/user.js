@@ -1,115 +1,84 @@
-const bcrypt = require("bcrypt");
+const Model = require('../model/user');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const auth = require('../config/auth');
 
-const User = require("../model/user");
+module.exports = {
 
-class UserController {
-
+    // Cadastra um novo usuário com a senha criptografada
     async create(name, email, password) {
-
         if (!name || !email || !password) {
-
-            throw new Error("Todos os campos são obrigatórios.");
-
+            throw new Error('Nome, email e senha são obrigatórios');
+        }
+        if (password.length < 6) {
+            throw new Error('A senha deve ter pelo menos 6 caracteres');
         }
 
-        const exists = await User.findOne({
-
-            where: { email }
-
-        });
-
-        if (exists) {
-
-            throw new Error("Email já está em uso.");
-
+        const existingUser = await Model.getByEmail(email);
+        if (existingUser) {
+            throw new Error('Já existe um usuário com este email');
         }
 
-        const hash = await bcrypt.hash(password, 10);
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const user = await Model.create(name, email, hashedPassword);
 
-        return User.create({
+        return { id: user.id, name: user.name, email: user.email };
+    },
 
-            name,
+    // Faz login e retorna um token JWT
+    async login(email, password) {
+        const user = await Model.getByEmail(email);
+        if (!user) {
+            throw new Error('Email ou senha inválidos');
+        }
 
-            email,
+        const passwordMatches = await bcrypt.compare(password, user.password);
+        if (!passwordMatches) {
+            throw new Error('Email ou senha inválidos');
+        }
 
-            password: hash
+        const token = jwt.sign(
+            { id: user.id, email: user.email },
+            auth.secret,
+            { expiresIn: auth.expiresIn }
+        );
 
-        });
-
-    }
+        return {
+            token,
+            user: { id: user.id, name: user.name, email: user.email }
+        };
+    },
 
     async getAll() {
-
-        return User.findAll({
-
-            attributes: {
-
-                exclude: ["password"]
-
-            }
-
-        });
-
-    }
+        const users = await Model.getAll();
+        return users.map(u => ({ id: u.id, name: u.name, email: u.email }));
+    },
 
     async getById(id) {
+        const user = await Model.getById(id);
+        if (!user) return null;
+        return { id: user.id, name: user.name, email: user.email };
+    },
 
-        return User.findByPk(id, {
+    async update(id, name, email, password) {
+        const data = {};
+        if (name) data.name = name;
+        if (email) data.email = email;
 
-            attributes: {
-
-                exclude: ["password"]
-
+        if (password) {
+            if (password.length < 6) {
+                throw new Error('A senha deve ter pelo menos 6 caracteres');
             }
-
-        });
-
-    }
-
-    async update(id, data) {
-
-        const user = await User.findByPk(id);
-
-        if (!user) {
-
-            throw new Error("Usuário não encontrado.");
-
+            data.password = await bcrypt.hash(password, 10);
         }
 
-        if (data.password) {
+        const user = await Model.update(id, data);
+        if (!user) return null;
 
-            data.password = await bcrypt.hash(
-
-                data.password,
-
-                10
-
-            );
-
-        }
-
-        await user.update(data);
-
-        return this.getById(id);
-
-    }
+        return { id: user.id, name: user.name, email: user.email };
+    },
 
     async delete(id) {
-
-        const user = await User.findByPk(id);
-
-        if (!user) {
-
-            throw new Error("Usuário não encontrado.");
-
-        }
-
-        await user.destroy();
-
-        return true;
-
+        return await Model.delete(id);
     }
-
-}
-
-module.exports = new UserController();
+};
