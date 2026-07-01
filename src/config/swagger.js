@@ -7,7 +7,11 @@ const options = {
         info: {
             title: 'API de Controle de Despesas',
             version: '1.0.0',
-            description: 'API RESTful para controle de despesas pessoais (Node.js + Express + Sequelize + MySQL)'
+            description:
+                'API RESTful para controle de despesas pessoais.\n\n' +
+                '**Como usar:** clique em **Authorize** (botão no topo), ' +
+                'cole o token no campo `Value` no formato `Bearer <token>` e confirme.\n\n' +
+                'Todas as rotas, exceto `POST /users` e `POST /auth/login`, exigem autenticação.'
         },
         servers: [
             { url: 'http://localhost:3000', description: 'Servidor local' }
@@ -21,45 +25,48 @@ const options = {
                 }
             },
             schemas: {
-                Usuario: {
+                User: {
                     type: 'object',
                     properties: {
-                        id: { type: 'integer', example: 1 },
-                        nome: { type: 'string', example: 'Maria Teste' },
-                        email: { type: 'string', example: 'maria@example.com' }
+                        id:    { type: 'integer', example: 1 },
+                        name:  { type: 'string',  example: 'Maria Teste' },
+                        email: { type: 'string',  example: 'maria@example.com' }
                     }
                 },
-                Categoria: {
+                Category: {
                     type: 'object',
                     properties: {
-                        id: { type: 'integer', example: 1 },
-                        nome: { type: 'string', example: 'Alimentação' },
-                        descricao: { type: 'string', example: 'Gastos com comida e mercado' }
+                        id:          { type: 'integer', example: 1 },
+                        name:        { type: 'string',  example: 'Alimentação' },
+                        description: { type: 'string',  example: 'Gastos com comida e mercado' }
                     }
                 },
-                Despesa: {
+                Expense: {
                     type: 'object',
                     properties: {
-                        id: { type: 'integer', example: 1 },
-                        descricao: { type: 'string', example: 'Supermercado' },
-                        valor: { type: 'number', format: 'double', example: 250.90 },
-                        data: { type: 'string', format: 'date', example: '2026-06-15' },
-                        status: { type: 'string', enum: ['PENDENTE', 'PAGA'], example: 'PENDENTE' },
-                        categoriaId: { type: 'integer', example: 1 },
-                        usuarioId: { type: 'integer', example: 1 }
+                        id:          { type: 'integer',           example: 1 },
+                        description: { type: 'string',            example: 'Supermercado' },
+                        amount:      { type: 'number', format: 'double', example: 250.90 },
+                        date:        { type: 'string', format: 'date',   example: '2026-06-15' },
+                        status:      { type: 'string', enum: ['PENDENTE', 'PAGA'], example: 'PENDENTE' },
+                        categoryId:  { type: 'integer',           example: 1 },
+                        userId:      { type: 'integer',           example: 1 },
+                        category:    { $ref: '#/components/schemas/Category' }
                     }
                 },
-                Erro: {
+                Error: {
                     type: 'object',
                     properties: {
-                        erro: { type: 'string', example: 'Erro ao criar despesa' }
+                        error: { type: 'string', example: 'Mensagem de erro' }
                     }
                 }
             }
         },
+        // Aplica bearerAuth como padrão em todas as rotas (cada rota que for pública
+        // sobrescreve com security: [] no próprio JSDoc)
         security: [{ bearerAuth: [] }]
     },
-    // Os comentários JSDoc que descrevem cada rota ficam dentro dos próprios arquivos de rota
+    // Lê as anotações @swagger dos arquivos de rota
     apis: ['./src/routes/*.js']
 };
 
