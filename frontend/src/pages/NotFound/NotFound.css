@@ -1,0 +1,22 @@
+.not-found {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  text-align: center;
+  padding: var(--space-6);
+}
+
+.not-found__codigo {
+  font-size: 64px;
+  color: var(--ledger-strong);
+  font-weight: 600;
+}
+
+.not-found__texto {
+  color: var(--text-muted);
+  max-width: 340px;
+  margin-bottom: var(--space-3);
+}

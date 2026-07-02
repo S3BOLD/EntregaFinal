@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const cors = require('cors');
 
 const sequelize = require('./config/database');
 require('./model/associations'); // registra os relacionamentos entre os models
@@ -12,6 +13,7 @@ const swaggerUi = require ('swagger-ui-express');
 const swaggerSpec = require ('./config/swagger');
 app.use("/docs",swaggerUi.serve,swaggerUi.setup(swaggerSpec));
 
+app.use(cors());
 app.use(express.json());
 
 // Testa a conexão com o banco

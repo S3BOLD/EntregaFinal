@@ -1,0 +1,16 @@
+.category-chart__tooltip {
+  background: var(--bg-elevated);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 13px;
+  box-shadow: var(--shadow);
+}
+
+.category-chart__tooltip span {
+  font-family: var(--font-mono);
+  color: var(--ledger-strong);
+}

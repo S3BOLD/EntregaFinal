@@ -1,0 +1,17 @@
+.stack-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.stack-form__grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+@media (max-width: 480px) {
+  .stack-form__grid2 {
+    grid-template-columns: 1fr;
+  }
+}

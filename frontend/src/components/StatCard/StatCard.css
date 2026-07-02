@@ -1,0 +1,30 @@
+.stat-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.stat-card__label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-faint);
+  font-weight: 600;
+}
+
+.stat-card__value {
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.stat-card__value--ledger {
+  color: var(--ledger-strong);
+}
+
+.stat-card__value--coral {
+  color: var(--coral-strong);
+}
+
+.stat-card__value--gold {
+  color: var(--gold);
+}

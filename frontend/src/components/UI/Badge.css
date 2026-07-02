@@ -1,0 +1,36 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+}
+
+.badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.badge--ledger {
+  color: var(--ledger-strong);
+  background: color-mix(in srgb, var(--ledger) 16%, transparent);
+  border-color: color-mix(in srgb, var(--ledger) 40%, transparent);
+}
+
+.badge--coral {
+  color: var(--coral-strong);
+  background: color-mix(in srgb, var(--coral) 16%, transparent);
+  border-color: color-mix(in srgb, var(--coral) 40%, transparent);
+}
+
+.badge--muted {
+  color: var(--text-muted);
+  background: var(--bg-elevated-2);
+  border-color: var(--line-strong);
+}

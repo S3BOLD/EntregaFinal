@@ -1,0 +1,28 @@
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: var(--space-4);
+}
+
+.category-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.category-card__nome {
+  font-size: 16px;
+  margin-top: var(--space-2);
+}
+
+.category-card__desc {
+  color: var(--text-muted);
+  font-size: 13px;
+  min-height: 36px;
+}
+
+.category-card__acoes {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
